@@ -16,6 +16,16 @@ def test_no_tables_directory(tmp_path, caplog):
     assert result == []
     assert any("No tables directory" in msg for msg in caplog.messages)
 
+@patch("pandas.read_sql")
+def test_execute_tdv_query_to_dict_failure(mock_read_sql):
+    mock_df = MagicMock()
+    mock_df.to_dict.side_effect = Exception("to_dict failed")
+    mock_read_sql.return_value = mock_df
+
+    td_conn = MagicMock()
+    result = ms.execute_tdv_query(td_conn, "SELECT *")
+    assert result == {}
+
 
 def test_folder_list_env_not_set(monkeypatch, caplog):
     caplog.set_level(logging.INFO)

@@ -52,11 +52,11 @@ def test_extract_proc_names_from_file(tmp_path):
     assert "mydb.${dbEnv}.another_proc()" in procs
 
 
-@patch("builtins.print")
-def test_pass_or_fail_pass(mock_print):
+def test_pass_or_fail_pass(caplog):
     result_dict = {"RESPONSE": ["PASSED"]}
-    ms.pass_or_fail(result_dict)
-    mock_print.assert_any_call("PASSED")
+    with caplog.at_level(logging.INFO):
+        ms.pass_or_fail(result_dict)
+        assert "PASSED" in caplog.text
 
 
 def test_pass_or_fail_fail_exit():

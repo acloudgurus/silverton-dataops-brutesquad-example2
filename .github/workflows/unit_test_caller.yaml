@@ -1,0 +1,56 @@
+name: Unit Tests & Coverage Check
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  run-unit-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: actions/runPVSTestAction
+
+    steps:
+      - name: Checkout test code from BruteSquad repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          if [[ "${{ inputs.environment_usage }}" == "poetry" ]]; then
+            curl -sSL https://install.python-poetry.org | python3 -
+            export PATH="$HOME/.local/bin:$PATH"
+            poetry install
+          else
+            pip install -r requirements.txt || true
+            pip install pytest coverage
+          fi
+
+          
+
+      - name: Run Shared Unit Test Action
+        uses: zilvertionz/shared-github-actions/test/python@master
+        with:
+          toml_parent_dir: "actions/runPVSTestAction"
+          debug_mode: true
+          environment_usage: "poetry"
+          additional_args: "-v"
+          coverage_gate: 80
+
+      - name: Run Shared Unit Test Action for toml utilities
+        uses: zilvertonz/shared-github-actions/test/python@master
+        with:
+          toml_parent_dir: "actions/findSqlFolderAction/utilities/toml_utilities"
+          debug_mode: true
+          environment_usage: "poetry"
+          additional_args: "-v"
+          coverage_gate: 80

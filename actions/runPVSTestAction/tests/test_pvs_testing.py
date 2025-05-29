@@ -52,12 +52,11 @@ def test_extract_proc_names_from_file(tmp_path):
     assert "mydb.${dbEnv}.another_proc()" in procs
 
 
-@patch("pvs_testing.pvs_logic.execute_tdv_query")
-def test_pass_or_fail_pass(mock_exec, capsys):
+@patch("builtins.print")
+def test_pass_or_fail_pass(mock_print):
     result_dict = {"RESPONSE": ["PASSED"]}
     ms.pass_or_fail(result_dict)
-    captured = capsys.readouterr()
-    assert "PASSED" in captured.out or "PASSED" in captured.err
+    mock_print.assert_any_call("PASSED")
 
 
 def test_pass_or_fail_fail_exit():
@@ -80,5 +79,5 @@ def test_execute_tdv_query_success(mock_read_sql):
 @patch("pandas.read_sql", side_effect=Exception("DB error"))
 def test_execute_tdv_query_failure(mock_read_sql):
     td_conn = MagicMock()
-    result = ms.execute_tdv_query(td_conn, "SELECT *")
-    assert result == {}
+    with pytest.raises(Exception, match="DB error"):
+        ms.execute_tdv_query(td_conn, "SELECT *")

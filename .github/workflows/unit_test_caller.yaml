@@ -1,11 +1,7 @@
 name: Unit Tests & Coverage Check
+
 on:
   workflow_dispatch:
-    inputs:
-      environment_usage:
-        description: 'Environment usage: poetry or pip'
-        required: false
-        default: 'poetry'
 
 permissions:
   contents: read
@@ -26,20 +22,13 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install Poetry and dependencies
         run: |
-          if [[ "${{ inputs.environment_usage }}" == "poetry" ]]; then
-            curl -sSL https://install.python-poetry.org | python3 -
-            export PATH="$HOME/.local/bin:$PATH"
-            poetry install
-          else
-            pip install -r requirements.txt || true
-            pip install pytest coverage
-          fi
+          curl -sSL https://install.python-poetry.org | python3 -
+          export PATH="$HOME/.local/bin:$PATH"
+          poetry install
 
-          
-
-      - name: Run Shared Unit Test Action
+      - name: Run Shared Unit Test Action for PVS Test
         uses: acloudgurus/shared-github-actions/test/python@master
         with:
           toml_parent_dir: "actions/runPVSTestAction"

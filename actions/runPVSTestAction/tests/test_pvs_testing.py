@@ -81,3 +81,32 @@ def test_execute_tdv_query_failure(mock_read_sql):
     td_conn = MagicMock()
     with pytest.raises(Exception, match="DB error"):
         ms.execute_tdv_query(td_conn, "SELECT *")
+
+@patch("pvs_testing.pvs_logic.teradatasql.connect")
+@patch("pvs_testing.pvs_logic.execute_tdv_query")
+@patch("pvs_testing.pvs_logic.extract_proc_names_from_file", return_value=["mydb.${dbEnv}.sample_proc"])
+@patch("pvs_testing.pvs_logic.fetch_all_sql_files", return_value=["/fake/path/file.sql"])
+@patch("pvs_testing.pvs_logic.os.environ.get")
+def test_main_path(mock_env_get, mock_fetch, mock_extract, mock_exec_query, mock_connect):
+    # Simulate environment variables
+    def env_side_effect(key):
+        env_vars = {
+            "FOLDER_LIST": '["/fake/path"]',
+            "DIRECTORY_LIST": "fake_dir",
+            "TDV_USERNAME": "user",
+            "TDV_PASSWORD": "pass",
+            "ChangeTicket_Num": "1234",
+            "CTASK_NUM": "5678"
+        }
+        return env_vars.get(key)
+    mock_env_get.side_effect = env_side_effect
+
+    # Simulate DB call return
+    mock_exec_query.return_value = {"RESPONSE": ["PASSED"]}
+
+    # Simulate DB connection
+    mock_conn = MagicMock()
+    mock_connect.return_value.__enter__.return_value = mock_conn
+
+    # Run main function
+    ms.main()

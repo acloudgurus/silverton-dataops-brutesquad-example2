@@ -1,9 +1,11 @@
 name: Unit Tests & Coverage Check
 on:
-  pull_request:
-    branches:
-      - main
-      - develop
+  workflow_dispatch:
+    inputs:
+      environment_usage:
+        description: 'Environment usage: poetry or pip'
+        required: false
+        default: 'poetry'
 
 permissions:
   contents: read

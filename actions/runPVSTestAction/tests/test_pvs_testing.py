@@ -1,10 +1,13 @@
 import os
 import pytest
 import logging
+import sys
+from pathlib import Path
 from unittest.mock import patch, MagicMock
+
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import pvs_testing as ms
-
-
 def test_no_tables_directory(tmp_path, caplog):
     caplog.set_level(logging.INFO)
     # tmp_path has no tables subdirectory
